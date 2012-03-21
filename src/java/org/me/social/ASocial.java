@@ -23,9 +23,9 @@ public class ASocial {
      * Web service operation
      */
     @WebMethod(operationName = "login")
-    public String login(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
+    public Boolean login(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
         database db=new database();
-        return username+":::"+password+":::"+db.checkLogin(username, password);
+        return db.checkLogin(username, password);
         /*if(db.checkLogin(username, password)){
             return "è andata!";
         }else{
