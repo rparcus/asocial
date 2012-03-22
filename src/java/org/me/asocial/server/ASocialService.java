@@ -1,5 +1,6 @@
 package org.me.asocial.server;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import java.io.File;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
@@ -97,7 +98,7 @@ class WriteXMLFile
 {
         String post_repo_xml="C:\\file.xml";
  
-	protected void getXML() {
+	protected boolean getXML() {
                 Database db = new Database();
                 ResultSet xrs=db.getPost();
                 
@@ -149,14 +150,17 @@ class WriteXMLFile
  		
  		transformer.transform(source, result);
  
-		System.out.println("File XML creato.");
- 
-	  } catch (SQLException ex) {
+		return true;
+                
+ 	  } catch (SQLException ex) {
                 System.out.println(ex);
+                return false;
         } catch (ParserConfigurationException pce) {
               System.out.println(pce);
+              return false;
 	  } catch (TransformerException tfe) {
               System.out.println(tfe);
+              return false;
 	  }
 	}
 }
@@ -185,8 +189,13 @@ public class ASocialService {
         //TODO: Authorization Checks
         Database db = new Database();
         String res=db.sendPost(userID, postTitle, postBody);
+        return res;
+    }
+
+    @WebMethod(operationName = "updatePostXML")
+    public boolean updatePostXML() {
         WriteXMLFile xml = new WriteXMLFile();
-        xml.getXML();
+        boolean res=xml.getXML();
         return res;
     }
 }
