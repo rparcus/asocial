@@ -96,7 +96,7 @@ class Database
 
 class WriteXMLFile 
 {
-        String post_repo_xml="C:\\file.xml";
+        String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
  
 	protected boolean getXML() {
                 Database db = new Database();
