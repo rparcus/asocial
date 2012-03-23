@@ -122,7 +122,7 @@ class Database
         }
 }
 
-class XMLFile 
+class XMLPostFile 
 {
         String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
  
@@ -312,7 +312,7 @@ public class ASocialService {
     public boolean updatePostXML() {
         XMLCommentsFile xmlcom = new XMLCommentsFile();
         xmlcom.getXML();
-        XMLFile xml = new XMLFile();
+        XMLPostFile xml = new XMLPostFile();
         boolean res = xml.getXML();
         return res;
     }
