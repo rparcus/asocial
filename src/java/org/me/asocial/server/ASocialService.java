@@ -65,7 +65,7 @@ class Database
 		}
         }
         
-        protected String sendPost(int userID, String postTitle, String postBody)
+        protected String setPost(int userID, String postTitle, String postBody)
         {
                 try {
                     String query="INSERT INTO `asocial_db`.`posts` (`post_id`, `post_date`, `post_title`, `post_body`, `user_id`)"
@@ -93,10 +93,25 @@ class Database
             return rs;
         }
         
+        protected String setComment(int userID, int postID, String commentBody)
+        {
+                try {
+                    String query="INSERT INTO `asocial_db`.`post_comments` (`user_id`, `post_id`, `comment_id`, `comment_body`, `comment_date`)"
+                                + "VALUES (1, ?, NULL, ?, CURRENT_TIMESTAMP)";
+                    pst=con.prepareStatement(query);
+                    pst.setInt(1, postID);
+                    pst.setString(2, commentBody);                    
+                    pst.executeUpdate();
+                } catch (Exception e){
+                    return "Errore! " + e;
+                }
+          return "Commento inserito!";  
+        }
+        
         protected ResultSet getComment()
         {
                 try {
-                    String query="SELECT * FROM post_comments ORDER BY `comment_date` DESC";
+                    String query="SELECT * FROM post_comments ORDER BY `comment_date` ASC";
                     pst=con.prepareStatement(query);
                     rs=pst.executeQuery();
                 } catch (Exception e) {
@@ -282,16 +297,14 @@ public class ASocialService {
 
     @WebMethod(operationName = "loginRequest")
     public String loginRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
-        //TODO: Authorization Checks
         Database db = new Database();
         return db.checkLogin(username,password);
     }
 
     @WebMethod(operationName = "setPost")
-    public String sendPost(@WebParam(name = "userID") int userID, @WebParam(name = "postTitle") String postTitle, @WebParam(name = "postBody") String postBody) {
-        //TODO: Authorization Checks
+    public String setPost(@WebParam(name = "userID") int userID, @WebParam(name = "postTitle") String postTitle, @WebParam(name = "postBody") String postBody) {
         Database db = new Database();
-        String res=db.sendPost(userID, postTitle, postBody);
+        String res = db.setPost(userID, postTitle, postBody);
         return res;
     }
 
@@ -300,7 +313,14 @@ public class ASocialService {
         XMLCommentsFile xmlcom = new XMLCommentsFile();
         xmlcom.getXML();
         XMLFile xml = new XMLFile();
-        boolean res=xml.getXML();
+        boolean res = xml.getXML();
+        return res;
+    }
+
+    @WebMethod(operationName = "setComment")
+    public String setComment(@WebParam(name = "userID") int userID, @WebParam(name = "postID") int postID, @WebParam(name = "commentBody") String commentBody) {
+        Database db = new Database();
+        String res = db.setComment(userID, postID, commentBody);
         return res;
     }
 }
