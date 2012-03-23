@@ -83,7 +83,20 @@ class Database
         protected ResultSet getPost()
         {
                 try {
-                    String query="SELECT * FROM posts";
+                    String query="SELECT * FROM posts ORDER BY `post_date` DESC";
+                    pst=con.prepareStatement(query);
+                    rs=pst.executeQuery();
+                } catch (Exception e) {
+                    System.out.println("Errore: " + e);
+                    return null;
+                }
+            return rs;
+        }
+        
+        protected ResultSet getComment()
+        {
+                try {
+                    String query="SELECT * FROM post_comments ORDER BY `comment_date` DESC";
                     pst=con.prepareStatement(query);
                     rs=pst.executeQuery();
                 } catch (Exception e) {
@@ -94,7 +107,7 @@ class Database
         }
 }
 
-class WriteXMLFile 
+class XMLFile 
 {
         String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
  
@@ -121,13 +134,21 @@ class WriteXMLFile
                     Element post = doc.createElement("post");
                     post_root.appendChild(post);
 
-                    Attr post_id = doc.createAttribute("post_id");
-                    post_id.setValue(""+pid); // CACATA
-                    post.setAttributeNode(post_id);
-
-                    Attr user_id = doc.createAttribute("user_id");
-                    user_id.setValue(""+uid); // CACATA
-                    post.setAttributeNode(user_id);
+//                    Attr post_id = doc.createAttribute("post_id");
+//                    post_id.setValue(""+pid); // CACATA
+//                    post.setAttributeNode(post_id);
+//
+//                    Attr user_id = doc.createAttribute("user_id");
+//                    user_id.setValue(""+uid); // CACATA
+//                    post.setAttributeNode(user_id);
+                    
+                    Element post_id = doc.createElement("post_id");
+                    post_id.appendChild(doc.createTextNode(""+pid)); // CACATA
+                    post.appendChild(post_id);
+                    
+                    Element user_id = doc.createElement("user_id");
+                    user_id.appendChild(doc.createTextNode(""+uid)); // CACATA
+                    post.appendChild(user_id);
 
                     Element post_date = doc.createElement("post_date");
                     post_date.appendChild(doc.createTextNode(""+pdate)); // CACATA
@@ -140,6 +161,88 @@ class WriteXMLFile
                     Element post_body = doc.createElement("post_body");
                     post_body.appendChild(doc.createTextNode(pbody));
                     post.appendChild(post_body);
+                }
+ 
+		// Scrive nel file XML
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(new File(post_repo_xml));
+ 		
+ 		transformer.transform(source, result);
+ 
+		return true;
+                
+ 	  } catch (SQLException ex) {
+                System.out.println(ex);
+                return false;
+        } catch (ParserConfigurationException pce) {
+              System.out.println(pce);
+              return false;
+	  } catch (TransformerException tfe) {
+              System.out.println(tfe);
+              return false;
+	  }
+	}
+}
+
+class XMLCommentsFile
+{
+        String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\commentsfile.xml";
+ 
+	protected boolean getXML() {
+                Database db = new Database();
+                ResultSet xrs=db.getComment();
+                
+            try {
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                  
+                Document doc = docBuilder.newDocument();
+                Element comment_root = doc.createElement("comment_root");
+                doc.appendChild(comment_root);
+                
+                while (xrs.next()) {
+                    String cbody = xrs.getString("comment_body");
+                    int cid = xrs.getInt("comment_id");
+                    int uid = xrs.getInt("user_id");
+                    int pid = xrs.getInt("post_id");
+                    Timestamp cdate = xrs.getTimestamp("comment_date");
+ 
+                    Element comment = doc.createElement("comment");
+                    comment_root.appendChild(comment);
+
+//                    Attr post_id = doc.createAttribute("post_id");
+//                    post_id.setValue(""+pid); // CACATA
+//                    comment.setAttributeNode(post_id);
+//
+//                    Attr user_id = doc.createAttribute("user_id");
+//                    user_id.setValue(""+uid); // CACATA
+//                    comment.setAttributeNode(user_id);
+//                    
+//                    Attr comment_id = doc.createAttribute("comment_id");
+//                    user_id.setValue(""+cid); // CACATA
+//                    comment.setAttributeNode(comment_id);
+                    
+                    Element post_id = doc.createElement("post_id");
+                    post_id.appendChild(doc.createTextNode(""+pid)); // CACATA
+                    comment.appendChild(post_id);
+                    
+                    Element user_id = doc.createElement("user_id");
+                    user_id.appendChild(doc.createTextNode(""+uid)); // CACATA
+                    comment.appendChild(user_id);
+                    
+                    Element comment_id = doc.createElement("comment_id");
+                    comment_id.appendChild(doc.createTextNode(""+cid)); // CACATA
+                    comment.appendChild(comment_id);
+                  
+                    Element comment_date = doc.createElement("comment_date");
+                    comment_date.appendChild(doc.createTextNode(""+cdate)); // CACATA
+                    comment.appendChild(comment_date);
+
+                    Element comment_body = doc.createElement("comment_body");
+                    comment_body.appendChild(doc.createTextNode(cbody));
+                    comment.appendChild(comment_body);
                 }
  
 		// Scrive nel file XML
@@ -194,7 +297,9 @@ public class ASocialService {
 
     @WebMethod(operationName = "updatePostXML")
     public boolean updatePostXML() {
-        WriteXMLFile xml = new WriteXMLFile();
+        XMLCommentsFile xmlcom = new XMLCommentsFile();
+        xmlcom.getXML();
+        XMLFile xml = new XMLFile();
         boolean res=xml.getXML();
         return res;
     }
