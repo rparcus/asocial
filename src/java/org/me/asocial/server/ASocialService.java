@@ -80,6 +80,29 @@ class Database
           return "Post inserito!";  
         }
         
+        protected String registrationRequest(String username, String password)
+        {
+                try {
+                    String query="SELECT `user_authentication`.`username` FROM `asocial_db`.`user_authentication` WHERE `username`=?";
+                    pst=con.prepareStatement(query);
+                    pst.setString(1, username);
+                    rs=pst.executeQuery();
+                    if(rs.next()) {
+                        return "Nome utente già in uso!";
+                    }
+                    pst.close();
+                    query="INSERT INTO `asocial_db`.`user_authentication` (`username`, `password`, `user_id`)" 
+                            + "VALUES (?, ?, NULL)";
+                    pst=con.prepareStatement(query);
+                    pst.setString(1, username);
+                    pst.setString(2, password);
+                    pst.executeUpdate();
+                } catch (Exception e) {
+                    return "Errore! " + e;
+                }
+                    return "Registrazione effettuata!";
+        }
+        
         protected ResultSet getPost()
         {
                 try {
@@ -299,6 +322,15 @@ public class ASocialService {
     public String loginRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
         Database db = new Database();
         return db.checkLogin(username,password);
+    }
+    
+    @WebMethod(operationName = "registrationRequest")
+    public String registrationRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password, @WebParam(name = "pwconfirm") String pwconfirm) {
+        Database db = new Database();
+        if(password.equals(pwconfirm)) {
+            return db.registrationRequest(username, password);
+        }
+        return "le password non corrispondono!";
     }
 
     @WebMethod(operationName = "setPost")
