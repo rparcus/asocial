@@ -1,13 +1,12 @@
 package org.me.asocial.server;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.io.File;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 
 import javax.xml.parsers.DocumentBuilder;
@@ -19,7 +18,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
  
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,7 +39,7 @@ class Database
 	{
 		try{
 			Class.forName("com.mysql.jdbc.Driver");
-			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","asocial_god","asocial");
+			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","root","qweqweqwe");
 		   }
 		catch (Exception e) 
 		{
@@ -230,22 +228,24 @@ class XMLPostFile
 // sostituisce un URL con il <a href= url>url</a>...
 class URLInString 
 {
-    protected static void main(String[] args) {
+    protected static String findURL(String[] args) {
         String s = args[0];
         // separa l'input per in per spazi ( un URL non ha spazi )
         String [] parts = s.split("\\s");
+        String out = new String();
 
         // Cerca di covnertire ogni parte in un URL  
         for( String item : parts ) try {
             URL url = new URL(item);
             // Se possibile aggiunge le ancore
-            System.out.print("<a href=\"" + url + "\">"+ url + "</a> " );    
+            out = out +"<a href=\"" + url + "\">"+ url + "</a> ";
         } catch (MalformedURLException e) {
             // se c'era un URL non era questo...
-            System.out.print( item + " " );
+            //System.out.print( item + " " );
+            out = out + item + " ";
         }
 
-        System.out.println();
+        return out;
     }
 }
 
