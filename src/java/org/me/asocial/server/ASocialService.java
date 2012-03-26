@@ -23,6 +23,9 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.net.URL;
+import java.net.MalformedURLException;
+
 //@author Andrea
 
 // **********************************************************
@@ -222,6 +225,28 @@ class XMLPostFile
               return false;
 	  }
 	}
+}
+
+// sostituisce un URL con il <a href= url>url</a>...
+class URLInString 
+{
+    protected static void main(String[] args) {
+        String s = args[0];
+        // separa l'input per in per spazi ( un URL non ha spazi )
+        String [] parts = s.split("\\s");
+
+        // Cerca di covnertire ogni parte in un URL  
+        for( String item : parts ) try {
+            URL url = new URL(item);
+            // Se possibile aggiunge le ancore
+            System.out.print("<a href=\"" + url + "\">"+ url + "</a> " );    
+        } catch (MalformedURLException e) {
+            // se c'era un URL non era questo...
+            System.out.print( item + " " );
+        }
+
+        System.out.println();
+    }
 }
 
 class XMLCommentsFile
