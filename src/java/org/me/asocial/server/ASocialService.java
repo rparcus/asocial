@@ -39,7 +39,7 @@ class Database
 	{
 		try{
 			Class.forName("com.mysql.jdbc.Driver");
-			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","root","qweqweqwe");
+			con=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/asocial_db","root","qweqweqwe");
 		   }
 		catch (Exception e) 
 		{
@@ -47,7 +47,7 @@ class Database
 		}
 	}
 
-	protected String checkLogin(String usr,String pwd)
+	protected int checkLogin(String usr,String pwd)
 	{
 		try {
                     String query="SELECT * FROM user_authentication WHERE username=? AND password=?";
@@ -57,12 +57,12 @@ class Database
                     rs=pst.executeQuery();
                     if(rs.next())
                     {
-			return "Login effettuato!";
+			return Integer.parseInt(rs.getString("user_id"));                      
                     } else {
-			return "Login errato!";
+			return -1;
                     }
 		} catch (Exception e) {
-                    return "Errore: " + e;
+                    return -1;
 		}
         }
         
@@ -230,11 +230,11 @@ class URLInString
 {
     protected static String findURL(String[] args) {
         String s = args[0];
-        // separa l'input per in per spazi ( un URL non ha spazi )
+        // separa l'input per spazi ( un URL non ha spazi )
         String [] parts = s.split("\\s");
         String out = new String();
 
-        // Cerca di covnertire ogni parte in un URL  
+        // Cerca di convertire ogni parte in un URL  
         for( String item : parts ) try {
             URL url = new URL(item);
             // Se possibile aggiunge le ancore
@@ -344,7 +344,7 @@ public class ASocialService {
     }
 
     @WebMethod(operationName = "loginRequest")
-    public String loginRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
+    public int loginRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
         Database db = new Database();
         return db.checkLogin(username,password);
     }
