@@ -1,6 +1,5 @@
 package org.me.asocial.server;
 
-
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
@@ -431,7 +430,6 @@ class imageResize
     
 }
 
-
 // **********************************************************
 // *************** WEB SERVICE ASocialService ***************
 // **********************************************************
@@ -481,5 +479,4 @@ public class ASocialService {
         String res = db.setComment(userID, postID, commentBody);
         return res;
     }
-    
 }
