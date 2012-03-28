@@ -7,8 +7,6 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import java.sql.*;
 
-
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,7 +37,8 @@ class Database
 	{
 		try{
 			Class.forName("com.mysql.jdbc.Driver");
-			con=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/asocial_db","root","qweqweqwe");
+			//con=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/asocial_db","root","qweqweqwe");
+                        con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","asocial_god","asocial");
 		   }
 		catch (Exception e) 
 		{
@@ -69,11 +68,22 @@ class Database
         protected String setPost(int userID, String postTitle, String postBody)
         {
                 try {
-                    String query="INSERT INTO `asocial_db`.`posts` (`post_id`, `post_date`, `post_title`, `post_body`, `user_id`)"
-                                + "VALUES (NULL, CURRENT_TIMESTAMP,?,?,1)";
+                    String query="SELECT `user_authentication`.`username` FROM `user_authentication` WHERE `user_authentication`.`user_id`=?";
+                    pst=con.prepareStatement(query);
+                    pst.setInt(1, userID);
+                    rs=pst.executeQuery();
+                    String userName="";
+                    if(rs.next()){
+                        userName=rs.getString("username");
+                    }
+                    pst.clearParameters();
+                    query="INSERT INTO `asocial_db`.`posts` (`post_id`, `post_date`, `post_title`, `post_body`, `user_id`, `username`)"
+                                + "VALUES (NULL, CURRENT_TIMESTAMP,?,?,?,?)";
                     pst=con.prepareStatement(query);
                     pst.setString(1, postTitle);
-                    pst.setString(2, postBody);                    
+                    pst.setString(2, postBody);
+                    pst.setInt(3, userID);
+                    pst.setString(4, userName);
                     pst.executeUpdate();
                 } catch (Exception e){
                     return "Errore! " + e;
@@ -120,11 +130,20 @@ class Database
         protected String setComment(int userID, int postID, String commentBody)
         {
                 try {
-                    String query="INSERT INTO `asocial_db`.`post_comments` (`user_id`, `post_id`, `comment_id`, `comment_body`, `comment_date`)"
-                                + "VALUES (1, ?, NULL, ?, CURRENT_TIMESTAMP)";
+                    String query="SELECT `user_authentication`.`username` FROM `user_authentication` WHERE `user_authentication`.`user_id`=?";
+                    pst=con.prepareStatement(query);
+                    pst.setInt(1, userID);
+                    rs=pst.executeQuery();
+                    String userName="";
+                    if(rs.next()){
+                        userName=rs.getString("username");
+                    }
+                    query="INSERT INTO `asocial_db`.`post_comments` (`user_id`, `post_id`, `comment_id`, `comment_body`, `comment_date`, `username`)"
+                                + "VALUES (1, ?, NULL, ?, CURRENT_TIMESTAMP, ?)";
                     pst=con.prepareStatement(query);
                     pst.setInt(1, postID);
-                    pst.setString(2, commentBody);                    
+                    pst.setString(2, commentBody);  
+                    pst.setString(3, userName);
                     pst.executeUpdate();
                 } catch (Exception e){
                     return "Errore! " + e;
@@ -165,6 +184,7 @@ class XMLPostFile
                 while (xrs.next()) {
                     String ptitle = xrs.getString("post_title");
                     String pbody = xrs.getString("post_body");
+                    String uname = xrs.getString("username");
                     Timestamp pdate = xrs.getTimestamp("post_date");
                     int pid = xrs.getInt("post_id");
                     int uid = xrs.getInt("user_id");
@@ -200,6 +220,10 @@ class XMLPostFile
                     Element post_body = doc.createElement("post_body");
                     post_body.appendChild(doc.createTextNode(pbody));
                     post.appendChild(post_body);
+                    
+                    Element username = doc.createElement("username");
+                    username.appendChild(doc.createTextNode(uname));
+                    post.appendChild(username);
                 }
  
 		// Scrive nel file XML
@@ -267,6 +291,7 @@ class XMLCommentsFile
                 
                 while (xrs.next()) {
                     String cbody = xrs.getString("comment_body");
+                    String uname = xrs.getString("username");
                     int cid = xrs.getInt("comment_id");
                     int uid = xrs.getInt("user_id");
                     int pid = xrs.getInt("post_id");
@@ -306,6 +331,10 @@ class XMLCommentsFile
                     Element comment_body = doc.createElement("comment_body");
                     comment_body.appendChild(doc.createTextNode(cbody));
                     comment.appendChild(comment_body);
+                    
+                    Element username = doc.createElement("username");
+                    username.appendChild(doc.createTextNode(uname));
+                    comment.appendChild(username);
                 }
  
 		// Scrive nel file XML
