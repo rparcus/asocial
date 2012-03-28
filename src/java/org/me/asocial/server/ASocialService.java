@@ -1,6 +1,10 @@
 package org.me.asocial.server;
 
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
@@ -360,6 +364,74 @@ class XMLCommentsFile
 	}
 }
 
+class imageResize
+{
+    
+    private static BufferedImage getScaledInstance(BufferedImage img,
+                                                int targetWidth,
+                                                int targetHeight,
+                                                Object hint,
+                                                boolean higherQuality)
+    {
+        //codice per fare riduzioni percentuali
+        int imgW = img.getWidth();
+        int imgH = img.getHeight();
+        int wReduction = (int)((imgW * targetWidth)/100);
+        int hReduction = (int)((imgH * targetHeight)/100);
+        targetWidth = imgW - wReduction;
+        targetHeight = imgH - hReduction;
+        
+        int type = (img.getTransparency() == Transparency.OPAQUE) ?
+            BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+        BufferedImage ret = (BufferedImage)img;
+        int w, h;
+        if (higherQuality) {
+            /*  Utilizza una tecnica multi-step: Si parte dalle dimmensioni 
+             *  originali. Con O(log n) passaggi, dove n è la dim dell'immagine,
+             *  si raggiungono le dimmensioni desiderate. 
+             *  Si utilizza inoltre drawImage() per ridurre l'overhead.
+             */
+            w = img.getWidth();
+            h = img.getHeight();
+        } else {
+            /*
+             * Utilizza una tecnica single-step: Dalle dimensioni orinali si
+             * passa direttamente a quella desiderata.
+             */
+            w = targetWidth;
+            h = targetHeight;
+        }
+        
+        do {
+            if (higherQuality && w > targetWidth) {
+                w /= 2;
+                if (w < targetWidth) {
+                    w = targetWidth;
+                }
+            }
+
+            if (higherQuality && h > targetHeight) {
+                h /= 2;
+                if (h < targetHeight) {
+                    h = targetHeight;
+                }
+            }
+
+            BufferedImage tmp = new BufferedImage(w, h, type);
+            Graphics2D g2 = tmp.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+            g2.drawImage(ret, 0, 0, w, h, null);
+            g2.dispose();
+
+            ret = tmp;
+        } while (w != targetWidth || h != targetHeight);
+
+        return ret;
+    }
+    
+}
+
+
 // **********************************************************
 // *************** WEB SERVICE ASocialService ***************
 // **********************************************************
@@ -409,4 +481,5 @@ public class ASocialService {
         String res = db.setComment(userID, postID, commentBody);
         return res;
     }
+    
 }
