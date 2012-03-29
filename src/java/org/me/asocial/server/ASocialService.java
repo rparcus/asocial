@@ -205,11 +205,11 @@ class XMLPostFile
 //                    post.setAttributeNode(user_id);
                     
                     Element post_id = doc.createElement("post_id");
-                    post_id.appendChild(doc.createTextNode(""+pid)); // CACATA
+                    post_id.appendChild(doc.createTextNode(Integer.toString(pid)));
                     post.appendChild(post_id);
                     
                     Element user_id = doc.createElement("user_id");
-                    user_id.appendChild(doc.createTextNode(""+uid)); // CACATA
+                    user_id.appendChild(doc.createTextNode(Integer.toString(uid))); 
                     post.appendChild(user_id);
 
                     Element post_date = doc.createElement("post_date");
@@ -304,27 +304,27 @@ class XMLCommentsFile
                     comment_root.appendChild(comment);
 
 //                    Attr post_id = doc.createAttribute("post_id");
-//                    post_id.setValue(""+pid); // CACATA
+//                    post_id.setValue(""+pid);
 //                    comment.setAttributeNode(post_id);
 //
 //                    Attr user_id = doc.createAttribute("user_id");
-//                    user_id.setValue(""+uid); // CACATA
+//                    user_id.setValue(""+uid);
 //                    comment.setAttributeNode(user_id);
 //                    
 //                    Attr comment_id = doc.createAttribute("comment_id");
-//                    user_id.setValue(""+cid); // CACATA
+//                    user_id.setValue(""+cid);
 //                    comment.setAttributeNode(comment_id);
                     
                     Element post_id = doc.createElement("post_id");
-                    post_id.appendChild(doc.createTextNode(""+pid)); // CACATA
+                    post_id.appendChild(doc.createTextNode(Integer.toString(pid)));
                     comment.appendChild(post_id);
                     
                     Element user_id = doc.createElement("user_id");
-                    user_id.appendChild(doc.createTextNode(""+uid)); // CACATA
+                    user_id.appendChild(doc.createTextNode(Integer.toString(uid)));
                     comment.appendChild(user_id);
                     
                     Element comment_id = doc.createElement("comment_id");
-                    comment_id.appendChild(doc.createTextNode(""+cid)); // CACATA
+                    comment_id.appendChild(doc.createTextNode(Integer.toString(cid)));
                     comment.appendChild(comment_id);
                   
                     Element comment_date = doc.createElement("comment_date");
