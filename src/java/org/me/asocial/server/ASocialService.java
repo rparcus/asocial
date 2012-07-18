@@ -5,11 +5,12 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import javax.jws.WebService;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.*;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import java.sql.*;
-
+import javax.jws.WebService;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,14 +19,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
- 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.net.URL;
-import java.net.MalformedURLException;
-
-//@author Andrea
 
 // **********************************************************
 // ************************ CLASSES *************************
@@ -197,11 +192,11 @@ class XMLPostFile
                     post_root.appendChild(post);
 
 //                    Attr post_id = doc.createAttribute("post_id");
-//                    post_id.setValue(""+pid); // CACATA
+//                    post_id.setValue(""+pid); //
 //                    post.setAttributeNode(post_id);
 //
 //                    Attr user_id = doc.createAttribute("user_id");
-//                    user_id.setValue(""+uid); // CACATA
+//                    user_id.setValue(""+uid); //
 //                    post.setAttributeNode(user_id);
                     
                     Element post_id = doc.createElement("post_id");
@@ -213,7 +208,7 @@ class XMLPostFile
                     post.appendChild(user_id);
 
                     Element post_date = doc.createElement("post_date");
-                    post_date.appendChild(doc.createTextNode(""+pdate)); // CACATA
+                    post_date.appendChild(doc.createTextNode(String.format("%1$TD %1$TT", pdate)));
                     post.appendChild(post_date);
 
                     Element post_title = doc.createElement("post_title");
@@ -328,7 +323,7 @@ class XMLCommentsFile
                     comment.appendChild(comment_id);
                   
                     Element comment_date = doc.createElement("comment_date");
-                    comment_date.appendChild(doc.createTextNode(""+cdate)); // CACATA
+                    comment_date.appendChild(doc.createTextNode(String.format("%1$TD %1$TT", cdate)));
                     comment.appendChild(comment_date);
 
                     Element comment_body = doc.createElement("comment_body");
