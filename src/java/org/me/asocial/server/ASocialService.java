@@ -4,10 +4,13 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
+import javax.imageio.ImageIO;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -35,8 +38,8 @@ class Database
 	{
 		try{
 			Class.forName("com.mysql.jdbc.Driver");
-			//con=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/asocial_db","root","qweqweqwe");
-                        con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","asocial_god","asocial");
+			con=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/asocial_db","root","");
+                        //con=DriverManager.getConnection("jdbc:mysql://localhost:3306/asocial_db","asocial_god","asocial");
 		   }
 		catch (Exception e) 
 		{
@@ -165,7 +168,8 @@ class Database
 
 class XMLPostFile 
 {
-        String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
+        //String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
+        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-5.3.8.1\\www\\ASocialSite\\commentsfile.xml";
  
 	protected boolean getXML() {
                 Database db = new Database();
@@ -273,7 +277,8 @@ class URLInString
 
 class XMLCommentsFile
 {
-        String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\commentsfile.xml";
+        //String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\commentsfile.xml";
+        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-5.3.8.1\\www\\ASocialSite\\commentsfile.xml";
  
 	protected boolean getXML() {
                 Database db = new Database();
@@ -358,13 +363,14 @@ class XMLCommentsFile
 	}
 }
 
-class imageResize
+class ImageResize
+
 {
-    
-    private static BufferedImage getScaledInstance(BufferedImage img,
+
+    public static byte[] getScaledInstance(BufferedImage img,
                                                 int targetWidth,
                                                 int targetHeight,
-                                                Object hint,
+
                                                 boolean higherQuality)
     {
         //codice per fare riduzioni percentuali
@@ -413,16 +419,30 @@ class imageResize
 
             BufferedImage tmp = new BufferedImage(w, h, type);
             Graphics2D g2 = tmp.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g2.drawImage(ret, 0, 0, w, h, null);
             g2.dispose();
 
             ret = tmp;
         } while (w != targetWidth || h != targetHeight);
+        
+        //trasforma la BufferedImage in un ByteArray
+        
+        try{
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	ImageIO.write( ret, "jpg", baos );
+	baos.flush();
+	byte[] imageInByte = baos.toByteArray();
+	baos.close();
+        return imageInByte;
+        
+	}catch(IOException e){
+		System.out.println(e.getMessage());
+	} 
 
-        return ret;
+        return null;
     }
-    
+
 }
 
 // **********************************************************
