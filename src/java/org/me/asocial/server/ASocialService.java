@@ -367,12 +367,17 @@ class ImageResize
 
 {
 
-    public static byte[] getScaledInstance(BufferedImage img,
+    public static Boolean getScaledInstance(    String addres,
                                                 int targetWidth,
                                                 int targetHeight,
 
                                                 boolean higherQuality)
     {
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File(addres));
+        } catch (IOException e) {
+        }
         //codice per fare riduzioni percentuali
         int imgW = img.getWidth();
         int imgH = img.getHeight();
@@ -424,6 +429,9 @@ class ImageResize
             g2.dispose();
 
             ret = tmp;
+            
+            ImageIO.write(ret, "jpg", new File("assets//_resized_Multi_Bin_.jpg"));
+            
         } while (w != targetWidth || h != targetHeight);
         
         //trasforma la BufferedImage in un ByteArray
@@ -493,5 +501,20 @@ public class ASocialService {
         Database db = new Database();
         String res = db.setComment(userID, postID, commentBody);
         return res;
+    }
+    
+    @WebMethod(operationName = "resizeImmage")
+    public Boolean resizeImmage ( @WebParam(name = "image") String image,
+                                        @WebParam(name = "targetW") int targetW,
+                                        @WebParam(name = "targetH") int targetH,
+                                        @WebParam(name = "higherQuality") Boolean higherQuality
+                                        )
+    {     
+    BufferedImage source = null;
+        try {
+            source = ImageIO.read(new File(image));
+        } catch (IOException e) {
+        }
+        return ImageResize.getScaledInstance(image, source, targetW, targetH, higherQuality);
     }
 }
