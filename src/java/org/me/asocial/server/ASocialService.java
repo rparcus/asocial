@@ -364,7 +364,6 @@ class XMLCommentsFile
 }
 
 class ImageResize
-
 {
 
     public static Boolean getScaledInstance(    String addres,
@@ -373,11 +372,14 @@ class ImageResize
 
                                                 boolean higherQuality)
     {
-        BufferedImage img = null;
+        BufferedImage img;
         try {
             img = ImageIO.read(new File(addres));
         } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return false;
         }
+        
         //codice per fare riduzioni percentuali
         int imgW = img.getWidth();
         int imgH = img.getHeight();
@@ -400,8 +402,9 @@ class ImageResize
             h = img.getHeight();
         } else {
             /*
-             * Utilizza una tecnica single-step: Dalle dimensioni orinali si
+             * Utilizza una tecnica single-step: Dalle dimensioni originali si
              * passa direttamente a quella desiderata.
+             * Più veloce ma di peggiore qualità.
              */
             w = targetWidth;
             h = targetHeight;
@@ -430,25 +433,14 @@ class ImageResize
 
             ret = tmp;
             
-            ImageIO.write(ret, "jpg", new File("assets//_resized_Multi_Bin_.jpg"));
-            
-        } while (w != targetWidth || h != targetHeight);
-        
-        //trasforma la BufferedImage in un ByteArray
-        
-        try{
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	ImageIO.write( ret, "jpg", baos );
-	baos.flush();
-	byte[] imageInByte = baos.toByteArray();
-	baos.close();
-        return imageInByte;
-        
-	}catch(IOException e){
-		System.out.println(e.getMessage());
-	} 
-
-        return null;
+            try{
+            ImageIO.write(ret, "jpg", new File(addres));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                return false;
+            }
+        } while (w != targetWidth || h != targetHeight);       
+        return true;
     }
 
 }
@@ -510,11 +502,6 @@ public class ASocialService {
                                         @WebParam(name = "higherQuality") Boolean higherQuality
                                         )
     {     
-    BufferedImage source = null;
-        try {
-            source = ImageIO.read(new File(image));
-        } catch (IOException e) {
-        }
-        return ImageResize.getScaledInstance(image, source, targetW, targetH, higherQuality);
+        return ImageResize.getScaledInstance(image, targetW, targetH, higherQuality);
     }
 }
