@@ -64,6 +64,23 @@ class Database
 		} catch (Exception e) {
                     return -1;
 		}
+        }protected String getUserName(int userID)
+	{
+		try {
+                    String query="SELECT * FROM user_authentication WHERE user_id=?";
+                    pst=con.prepareStatement(query);
+                    pst.setString(1, String.valueOf(userID));
+                    rs=pst.executeQuery();
+                    if(rs.next())
+                    {
+			return rs.getString("username");                      
+                    } 
+                    else{
+                        return "error";
+                    }
+		} catch (Exception e) {
+                    return "error";
+		}
         }
         
         protected String setPost(int userID, String postTitle, String postBody)
@@ -164,6 +181,40 @@ class Database
                 }
             return rs;
         }
+        
+        protected Boolean getAvatar(int userID){
+            try{
+                String query="SELECT `asocial_db`.`user_authentication`.`avatar` FROM `asocial_db`.`user_authentication` WHERE `username`=?";
+
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                rs=pst.executeQuery();
+                if(rs.next())
+                {
+                    return true;                      
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        protected Boolean setAvatar(int userID){
+            try{                                        
+               String query="UPDATE `asocial_db`.`user_authentication`"
+                            +"SET `avatar`=1"
+                            +"WHERE `user_id`=?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                rs=pst.executeQuery();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+         
+        
 }
 
 class XMLPostFile 
@@ -369,7 +420,6 @@ class ImageResize
     public static Boolean getScaledInstance(    String addres,
                                                 int targetWidth,
                                                 int targetHeight,
-
                                                 boolean higherQuality)
     {
         BufferedImage img;
@@ -380,13 +430,17 @@ class ImageResize
             return false;
         }
         
-        //codice per fare riduzioni percentuali
+        //Codice per fare riduzioni percentuali invece che deterministiche
+        //Potrebbe servire...
+        /*
         int imgW = img.getWidth();
         int imgH = img.getHeight();
         int wReduction = (int)((imgW * targetWidth)/100);
         int hReduction = (int)((imgH * targetHeight)/100);
         targetWidth = imgW - wReduction;
         targetHeight = imgH - hReduction;
+        * 
+        */
         
         int type = (img.getTransparency() == Transparency.OPAQUE) ?
             BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
@@ -458,13 +512,22 @@ public class ASocialService {
     }
 
     @WebMethod(operationName = "loginRequest")
-    public int loginRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password) {
+    public int loginRequest(    @WebParam(name = "username") String username,
+                                @WebParam(name = "password") String password) {
         Database db = new Database();
         return db.checkLogin(username,password);
     }
     
+    @WebMethod(operationName = "getUserName")
+    public String getUserName(@WebParam(name = "userID") int userID) {
+        Database db = new Database();
+        return db.getUserName(userID);
+    }
+    
     @WebMethod(operationName = "registrationRequest")
-    public String registrationRequest(@WebParam(name = "username") String username, @WebParam(name = "password") String password, @WebParam(name = "pwconfirm") String pwconfirm) {
+    public String registrationRequest(  @WebParam(name = "username") String username,
+                                        @WebParam(name = "password") String password,
+                                        @WebParam(name = "pwconfirm") String pwconfirm) {
         Database db = new Database();
         if(password.equals(pwconfirm)) {
             return db.registrationRequest(username, password);
@@ -473,7 +536,10 @@ public class ASocialService {
     }
 
     @WebMethod(operationName = "setPost")
-    public String setPost(@WebParam(name = "userID") int userID, @WebParam(name = "postTitle") String postTitle, @WebParam(name = "postBody") String postBody) {
+    public String setPost(  @WebParam(name = "userID") int userID,
+                            @WebParam(name = "postTitle") String postTitle, 
+                            @WebParam(name = "postBody") String postBody) 
+    {
         Database db = new Database();
         String res = db.setPost(userID, postTitle, postBody);
         return res;
@@ -489,19 +555,40 @@ public class ASocialService {
     }
 
     @WebMethod(operationName = "setComment")
-    public String setComment(@WebParam(name = "userID") int userID, @WebParam(name = "postID") int postID, @WebParam(name = "commentBody") String commentBody) {
+    public String setComment(   @WebParam(name = "userID") int userID,
+                                @WebParam(name = "postID") int postID,  
+                                @WebParam(name = "commentBody") String commentBody)
+    {
         Database db = new Database();
         String res = db.setComment(userID, postID, commentBody);
         return res;
     }
     
+    @WebMethod(operationName = "checkAvatar")
+    public Boolean checkAvatar(@WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        Boolean res = db.getAvatar(userID);
+        return res;
+    }
+    
+    @WebMethod(operationName = "setAvatar")
+    public Boolean setAvatar(   @WebParam(name ="userID") String userID)
+    {
+        Database db = new Database();
+        Boolean res = db.setAvatar(Integer.parseInt(userID));
+        return res;
+    }
+    
     @WebMethod(operationName = "resizeImmage")
-    public Boolean resizeImmage ( @WebParam(name = "image") String image,
-                                        @WebParam(name = "targetW") int targetW,
-                                        @WebParam(name = "targetH") int targetH,
-                                        @WebParam(name = "higherQuality") Boolean higherQuality
+    public Boolean resizeImmage (   @WebParam(name = "image") String image,
+                                    @WebParam(name = "HD") Boolean higherQuality
                                         )
     {     
-        return ImageResize.getScaledInstance(image, targetW, targetH, higherQuality);
+        //WebParam(name = "targetW") int targetW,
+        //WebParam(name = "targetH") int targetH,
+        //passo h e w di default= 50
+        Boolean res = ImageResize.getScaledInstance(image, 50, 50, higherQuality);
+        return  res;
     }
 }
