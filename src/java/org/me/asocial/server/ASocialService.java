@@ -157,11 +157,12 @@ class Database
                         userName=rs.getString("username");
                     }
                     query="INSERT INTO `asocial_db`.`post_comments` (`user_id`, `post_id`, `comment_id`, `comment_body`, `comment_date`, `username`)"
-                                + "VALUES (1, ?, NULL, ?, CURRENT_TIMESTAMP, ?)";
+                                + "VALUES (?, ?, NULL, ?, CURRENT_TIMESTAMP, ?)";
                     pst=con.prepareStatement(query);
-                    pst.setInt(1, postID);
-                    pst.setString(2, commentBody);  
-                    pst.setString(3, userName);
+                    pst.setInt(1,userID);
+                    pst.setInt(2, postID);
+                    pst.setString(3, commentBody);  
+                    pst.setString(4, userName);
                     pst.executeUpdate();
                 } catch (Exception e){
                     return "Errore! " + e;
@@ -220,7 +221,7 @@ class Database
 class XMLPostFile 
 {
         //String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\file.xml";
-        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-5.3.8.1\\www\\ASocialSite\\commentsfile.xml";
+        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-12.1\\www\\ASocialSite\\file.xml";
  
 	protected boolean getXML() {
                 Database db = new Database();
@@ -329,7 +330,7 @@ class URLInString
 class XMLCommentsFile
 {
         //String post_repo_xml="C:\\xampp\\htdocs\\ASocialClient\\commentsfile.xml";
-        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-5.3.8.1\\www\\ASocialSite\\commentsfile.xml";
+        String post_repo_xml="C:\\Program Files (x86)\\EasyPHP-12.1\\www\\ASocialSite\\commentsfile.xml";
  
 	protected boolean getXML() {
                 Database db = new Database();
