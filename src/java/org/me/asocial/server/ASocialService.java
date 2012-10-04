@@ -306,14 +306,13 @@ class XMLPostFile
 // sostituisce un URL con il <a href= url>url</a>...
 class URLInString 
 {
-    protected static String findURL(String[] args) {
-        String s = args[0];
+    protected static String findURL(String s) {
         // separa l'input per spazi ( un URL non ha spazi )
         String [] parts = s.split("\\s");
         String out = new String();
 
         // Cerca di convertire ogni parte in un URL  
-        for( String item : parts ) try {
+        for( String item : parts ){ try {
             URL url = new URL(item);
             // Se possibile aggiunge le ancore
             out = out +"<a href=\"" + url + "\">"+ url + "</a> ";
@@ -322,7 +321,7 @@ class URLInString
             //System.out.print( item + " " );
             out = out + item + " ";
         }
-
+        }
         return out;
     }
 }
@@ -552,6 +551,12 @@ public class ASocialService {
         xmlcom.getXML();
         XMLPostFile xml = new XMLPostFile();
         boolean res = xml.getXML();
+        return res;
+    }
+    
+    @WebMethod(operationName = "URLify")
+    public String URLify( @WebParam(name = "str") String str){
+        String res = URLInString.findURL(str);
         return res;
     }
 
