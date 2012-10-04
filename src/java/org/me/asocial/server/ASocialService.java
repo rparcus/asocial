@@ -246,14 +246,6 @@ class XMLPostFile
  
                     Element post = doc.createElement("post");
                     post_root.appendChild(post);
-
-//                    Attr post_id = doc.createAttribute("post_id");
-//                    post_id.setValue(""+pid); //
-//                    post.setAttributeNode(post_id);
-//
-//                    Attr user_id = doc.createAttribute("user_id");
-//                    user_id.setValue(""+uid); //
-//                    post.setAttributeNode(user_id);
                     
                     Element post_id = doc.createElement("post_id");
                     post_id.appendChild(doc.createTextNode(Integer.toString(pid)));
@@ -303,7 +295,7 @@ class XMLPostFile
 	}
 }
 
-// sostituisce un URL con il <a href= url>url</a>...
+// sostituisce un URL completo di protocollo con <a href= url> WRL </a>...
 class URLInString 
 {
     protected static String findURL(String s) {
@@ -353,18 +345,6 @@ class XMLCommentsFile
  
                     Element comment = doc.createElement("comment");
                     comment_root.appendChild(comment);
-
-//                    Attr post_id = doc.createAttribute("post_id");
-//                    post_id.setValue(""+pid);
-//                    comment.setAttributeNode(post_id);
-//
-//                    Attr user_id = doc.createAttribute("user_id");
-//                    user_id.setValue(""+uid);
-//                    comment.setAttributeNode(user_id);
-//                    
-//                    Attr comment_id = doc.createAttribute("comment_id");
-//                    user_id.setValue(""+cid);
-//                    comment.setAttributeNode(comment_id);
                     
                     Element post_id = doc.createElement("post_id");
                     post_id.appendChild(doc.createTextNode(Integer.toString(pid)));
