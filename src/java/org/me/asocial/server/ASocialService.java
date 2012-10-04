@@ -418,6 +418,7 @@ class ImageResize
 {
 
     public static Boolean getScaledInstance(    String addres,
+                                                String resizedAddres,
                                                 int targetWidth,
                                                 int targetHeight,
                                                 boolean higherQuality)
@@ -488,7 +489,7 @@ class ImageResize
             ret = tmp;
             
             try{
-            ImageIO.write(ret, "jpg", new File(addres));
+            ImageIO.write(ret, "jpg", new File(resizedAddres));
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 return false;
@@ -588,13 +589,14 @@ public class ASocialService {
     
     @WebMethod(operationName = "resizeImmage")
     public Boolean resizeImmage (   @WebParam(name = "image") String image,
+                                    @WebParam(name ="resizedAddres") String resizedAddres,
                                     @WebParam(name = "HD") Boolean higherQuality
                                         )
     {     
         //WebParam(name = "targetW") int targetW,
         //WebParam(name = "targetH") int targetH,
         //passo h e w di default= 50
-        Boolean res = ImageResize.getScaledInstance(image, 50, 50, higherQuality);
+        Boolean res = ImageResize.getScaledInstance(image, resizedAddres, 50, 50, higherQuality);
         return  res;
     }
 }
