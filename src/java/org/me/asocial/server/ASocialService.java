@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -22,6 +24,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.catalina.util.Base64;
+//trovi tutto qui -> http://stackoverflow.com/a/9038038/814180
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -397,18 +402,20 @@ class XMLCommentsFile
 class ImageResize
 {
 
-    public static Boolean getScaledInstance(    String addres,
-                                                String resizedAddres,
-                                                int targetWidth,
-                                                int targetHeight,
-                                                boolean higherQuality)
+    public static String getScaledInstance(    String addres,
+                                               String resizedAddres,
+                                               int targetWidth,
+                                               int targetHeight,
+                                               boolean higherQuality)
     {
         BufferedImage img;
+        File target;
+        target = new File(resizedAddres);
         try {
             img = ImageIO.read(new File(addres));
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            return false;
+            return "Errore";
         }
         
         //Codice per fare riduzioni percentuali invece che deterministiche
@@ -469,13 +476,21 @@ class ImageResize
             ret = tmp;
             
             try{
-            ImageIO.write(ret, "jpg", new File(resizedAddres));
+                ImageIO.write(ret, "jpg", target);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                return false;
+                return "ERRORE";
             }
-        } while (w != targetWidth || h != targetHeight);       
-        return true;
+        } while (w != targetWidth || h != targetHeight);  
+        
+        try {
+            String ris;
+            ris = Base64.encode(FileUtils.readFileToByteArray(target));
+            return ris;
+        } catch (IOException ex) {
+            Logger.getLogger(ImageResize.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "ERRORE";
     }
 
 }
@@ -567,7 +582,7 @@ public class ASocialService {
         return res;
     }
     
-    @WebMethod(operationName = "resizeImmage")
+    /*@WebMethod(operationName = "resizeImmage")
     public Boolean resizeImmage (   @WebParam(name = "image") String image,
                                     @WebParam(name ="resizedAddres") String resizedAddres,
                                     @WebParam(name = "HD") Boolean higherQuality
@@ -578,5 +593,20 @@ public class ASocialService {
         //passo h e w di default= 50
         Boolean res = ImageResize.getScaledInstance(image, resizedAddres, 50, 50, higherQuality);
         return  res;
+    }*/
+    
+    
+    @WebMethod(operationName = "resizeImmage")
+    public String resizeImmage (   @WebParam(name = "image") String image,
+                                    @WebParam(name ="resizedAddres") String resizedAddres,
+                                    @WebParam(name = "HD") Boolean higherQuality
+                                        )
+    {     
+        //WebParam(name = "targetW") int targetW,
+        //WebParam(name = "targetH") int targetH,
+        //passo h e w di default= 50
+        String res = ImageResize.getScaledInstance(image, resizedAddres, 50, 50, higherQuality);
+        return  res;
     }
+    
 }
