@@ -403,14 +403,21 @@ class ImageResize
 {
 
     public static String getScaledInstance(    String addres,
-                                               String resizedAddres,
+                                               //String resizedAddres,
                                                int targetWidth,
                                                int targetHeight,
                                                boolean higherQuality)
     {
         BufferedImage img;
         File target;
-        target = new File(resizedAddres);
+        //target = new File(resizedAddres);
+        try{
+            //target = new File(resizedAddres);
+            target = File.createTempFile("tmp-img", ".jpeg");
+    	}catch(IOException e){
+            System.out.println(e.getMessage());
+            return "ERRORE";
+    	}
         try {
             img = ImageIO.read(new File(addres));
         } catch (IOException e) {
@@ -486,6 +493,7 @@ class ImageResize
         try {
             String ris;
             ris = Base64.encode(FileUtils.readFileToByteArray(target));
+            target.delete();
             return ris;
         } catch (IOException ex) {
             Logger.getLogger(ImageResize.class.getName()).log(Level.SEVERE, null, ex);
@@ -598,14 +606,15 @@ public class ASocialService {
     
     @WebMethod(operationName = "resizeImmage")
     public String resizeImmage (   @WebParam(name = "image") String image,
-                                    @WebParam(name ="resizedAddres") String resizedAddres,
+                                    //@WebParam(name ="resizedAddres") String resizedAddres,
+                                    @WebParam(name ="width") int width,
+                                    @WebParam(name ="height") int height,                            
                                     @WebParam(name = "HD") Boolean higherQuality
                                         )
     {     
         //WebParam(name = "targetW") int targetW,
         //WebParam(name = "targetH") int targetH,
-        //passo h e w di default= 50
-        String res = ImageResize.getScaledInstance(image, resizedAddres, 50, 50, higherQuality);
+        String res = ImageResize.getScaledInstance(image, width, height, higherQuality);
         return  res;
     }
     
