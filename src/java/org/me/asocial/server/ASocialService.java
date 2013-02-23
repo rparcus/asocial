@@ -12,6 +12,8 @@ import java.net.URL;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -69,7 +71,9 @@ class Database
 		} catch (Exception e) {
                     return -1;
 		}
-        }protected String getUserName(int userID)
+        }
+        
+        protected String getUserName(int userID)
 	{
 		try {
                     String query="SELECT * FROM user_authentication WHERE user_id=?";
@@ -175,6 +179,72 @@ class Database
           return "Commento inserito!";  
         }
         
+        protected String remvComment(int commentID)
+        {
+            try{
+                String query = "DELETE FROM `post_comments` WHERE `comment_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, commentID);
+                pst.executeUpdate();
+            } catch (Exception e){
+                return "Errore! " + e;
+             }
+            return "Commento rimosso con successo!";
+        }
+        
+        protected Boolean remvPost(int postID)
+        {
+            try{
+                String query = "DELETE FROM `posts` WHERE `post_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, postID);
+                pst.executeUpdate();
+                
+                query = "DELETE FROM `post_comments` WHERE `post_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, postID);
+                pst.executeUpdate();
+                
+                return true;                
+            } catch (Exception e){
+                return false;
+             }
+        }
+        
+        protected int remvUser(int userID)
+        {
+            try{
+                String query = "DELETE FROM `user_authentication` WHERE `username` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                return pst.executeUpdate();
+            } catch (Exception e){
+                return -1;
+             }
+        }
+        
+        protected void hatePost(int postID)
+        {
+            try{
+                String query = "UPDATE `posts` SET `hate` = `hate`+1 WHERE `post_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, postID);
+                pst.executeUpdate();
+            } catch (Exception e){
+             }
+        }
+        
+        protected void hateComment(int commentID)
+        {
+            try{
+                String query = "UPDATE `post_comments` SET `hate` = `hate`+1 WHERE `comment_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, commentID);
+                pst.executeUpdate();
+            } catch (Exception e){
+             }
+        }
+        
         protected ResultSet getComment()
         {
                 try {
@@ -188,39 +258,101 @@ class Database
             return rs;
         }
         
-        protected Boolean getAvatar(int userID){
+        protected int getAvatar(int userID){
             try{
-                String query="SELECT `asocial_db`.`user_authentication`.`avatar` FROM `asocial_db`.`user_authentication` WHERE `username`=?";
+                String query="SELECT `avatar` FROM `user_authentication` WHERE `user_id`=?";
 
                 pst=con.prepareStatement(query);
                 pst.setInt(1, userID);
                 rs=pst.executeQuery();
-                if(rs.next())
+                while(rs.next())
                 {
-                    return true;                      
-                } else {
-                    return false;
-                }
+                    return rs.getInt(1);
+                } return 0;
             } catch (Exception e) {
-                return false;
+                return 0;
             }
         }
         
         protected Boolean setAvatar(int userID){
             try{                                        
-               String query="UPDATE `asocial_db`.`user_authentication`"
-                            +"SET `avatar`=1"
-                            +"WHERE `user_id`=?";
+                String query="UPDATE `user_authentication` SET `avatar`=1 WHERE `user_id`=?";
                 pst=con.prepareStatement(query);
                 pst.setInt(1, userID);
-                rs=pst.executeQuery();
+                pst.executeUpdate();
                 return true;
             } catch (Exception e) {
                 return false;
             }
         }
          
+        protected void setAdmin(int userID){
+            try{
+                String query="INSERT INTO `admin`(`user_id`, `admin_level`) VALUES (?, ?)";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                pst.setInt(2, 2);
+                pst.executeUpdate();
+            } catch (Exception e) {
+            }
+        }
         
+        protected void remvAdmin(int userID){
+            try{
+                String query="DELETE FROM `admin` WHERE `user_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                pst.executeUpdate();
+            } catch (Exception e) {
+}
+        }
+
+        protected int isAdmin(int userID)
+	{
+		try {
+                    String query="SELECT `admin_level` FROM `admin` WHERE `user_id` = ?";
+                    pst=con.prepareStatement(query);
+                    pst.setInt(1, userID);
+                    rs=pst.executeQuery();
+                    if(rs.next())
+                    {
+			return rs.getInt("admin_level");                 
+                    } else {
+			return -1;
+                    }
+		} catch (Exception e) {
+                    return -1;
+		}
+        }
+         
+        protected String getUserBio(int userID)
+        {
+            try {
+                String query="SELECT `bio` FROM `user_authentication` WHERE `user_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setInt(1, userID);
+                rs=pst.executeQuery();
+                rs.next();
+                return rs.getString("bio");
+            } catch (Exception e){
+                return "";
+            }
+        }
+        
+        protected Boolean setUserBio(int userID, String bio)
+        {
+            try {
+                String query="UPDATE `user_authentication` SET `bio` = ? WHERE `user_id` = ?";
+                pst=con.prepareStatement(query);
+                pst.setString(1, bio);
+                pst.setInt(2, userID);
+                pst.executeUpdate();
+                return true;
+            } catch (Exception e){
+                return false;
+}
+        }
+
 }
 
 class XMLPostFile 
@@ -247,6 +379,7 @@ class XMLPostFile
                     Timestamp pdate = xrs.getTimestamp("post_date");
                     int pid = xrs.getInt("post_id");
                     int uid = xrs.getInt("user_id");
+                    int hate = xrs.getInt("hate");
 
  
                     Element post = doc.createElement("post");
@@ -275,6 +408,10 @@ class XMLPostFile
                     Element username = doc.createElement("username");
                     username.appendChild(doc.createTextNode(uname));
                     post.appendChild(username);
+                    
+                    Element hate_counter = doc.createElement("hate");
+                    hate_counter.appendChild(doc.createTextNode (Integer.toString(hate)));
+                    post.appendChild(hate_counter);   
                 }
  
 		// Scrive nel file XML
@@ -306,13 +443,29 @@ class URLInString
     protected static String findURL(String s) {
         // separa l'input per spazi ( un URL non ha spazi )
         String [] parts = s.split("\\s");
+        String pattern = "https?:\\/\\/(?:[0-9A-Z-]+\\.)?(?:youtu\\.be\\/|youtube\\.com\\S*[^\\w\\-\\s])([\\w\\-]{11})(?=[^\\w\\-]|$)(?![?=&+%\\w]*(?:['\"][^<>]*>|<\\/a>))[?=&+%\\w]*";
         String out = new String();
+        Pattern compiledPattern;
+        Matcher matcher;
 
         // Cerca di convertire ogni parte in un URL  
         for( String item : parts ){ try {
             URL url = new URL(item);
             // Se possibile aggiunge le ancore
             out = out +"<a href=\"" + url + "\">"+ url + "</a> ";
+
+            compiledPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+            matcher = compiledPattern.matcher(item);
+            while(matcher.find()) {
+                //System.out.println(matcher.group());
+                out = out
+               +"<iframe class='youtube-player' type='text/html' src='http://www.youtube.com/embed/"
+               + matcher.group(1)
+               +"' frameborder='0'></iframe>";
+                //width='640' height='385'
+                
+                
+            }
         } catch (MalformedURLException e) {
             // se c'era un URL non era questo...
             //System.out.print( item + " " );
@@ -346,6 +499,7 @@ class XMLCommentsFile
                     int cid = xrs.getInt("comment_id");
                     int uid = xrs.getInt("user_id");
                     int pid = xrs.getInt("post_id");
+                    int hate = xrs.getInt("hate");
                     Timestamp cdate = xrs.getTimestamp("comment_date");
  
                     Element comment = doc.createElement("comment");
@@ -374,6 +528,10 @@ class XMLCommentsFile
                     Element username = doc.createElement("username");
                     username.appendChild(doc.createTextNode(uname));
                     comment.appendChild(username);
+                    
+                    Element hate_counter = doc.createElement("hate");
+                    hate_counter.appendChild(doc.createTextNode(Integer.toString(hate)));
+                    comment.appendChild(hate_counter);
                 }
  
 		// Scrive nel file XML
@@ -574,20 +732,76 @@ public class ASocialService {
         return res;
     }
     
-    @WebMethod(operationName = "checkAvatar")
-    public Boolean checkAvatar(@WebParam(name ="userID") int userID)
+    @WebMethod(operationName = "remvComment")
+    public void remvComment(  @WebParam(name = "commentID") int commentID)
     {
         Database db = new Database();
-        Boolean res = db.getAvatar(userID);
+        db.remvComment(commentID);
+    }
+    
+    @WebMethod(operationName = "remvPost")
+    public Boolean remvPost(  @WebParam(name = "postID") int postID)
+    {
+        Database db = new Database();
+        return db.remvPost(postID);
+    }
+    
+    @WebMethod(operationName = "remvUser")
+    public int remvUser(  @WebParam(name = "userID") int userID)
+    {
+        Database db = new Database();
+        return db.remvUser(userID);
+    }
+    
+    @WebMethod(operationName = "hatePost")
+    public void hatePost(  @WebParam(name = "postID") int postID)
+    {
+        Database db = new Database();
+        db.hatePost(postID);
+    }
+    
+    @WebMethod(operationName = "hateComment")
+    public void hateComment(  @WebParam(name = "commentID") int commentID)
+    {
+        Database db = new Database();
+        db.hateComment(commentID);
+    }
+    
+    @WebMethod(operationName = "checkAvatar")
+    public int checkAvatar(@WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        int res = db.getAvatar(userID);
         return res;
     }
     
     @WebMethod(operationName = "setAvatar")
-    public Boolean setAvatar(   @WebParam(name ="userID") String userID)
+    public Boolean setAvatar(   @WebParam(name ="userID") int userID)
     {
         Database db = new Database();
-        Boolean res = db.setAvatar(Integer.parseInt(userID));
+        Boolean res = db.setAvatar(userID);
         return res;
+    }
+    
+    @WebMethod(operationName = "setAdmin")
+    public void setAdmin(@WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        db.setAdmin(userID);
+    }
+    
+    @WebMethod(operationName = "remvAdmin")
+    public void remvAdmin(@WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        db.remvAdmin(userID);
+    }
+    
+    @WebMethod(operationName = "isAdmin")
+    public int isAdmin(@WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        return db.isAdmin(userID);
     }
     
     /*@WebMethod(operationName = "resizeImmage")
@@ -618,4 +832,22 @@ public class ASocialService {
         return  res;
     }
     
+    @WebMethod(operationName = "getUserBio")
+    public String getUserBio(   @WebParam(name ="userID") int userID)
+    {
+        Database db = new Database();
+        String res = db.getUserBio(userID);
+        if(res == null){
+            res = "";
+}
+        return res;
+    }
+    
+    @WebMethod(operationName = "setUserBio")
+    public Boolean setUserBio(   @WebParam(name ="userID") int userID,
+                                @WebParam(name ="bio") String bio)
+    {
+        Database db = new Database();
+        return db.setUserBio(userID, bio);
+    }  
 }
