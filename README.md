@@ -1,10 +1,11 @@
-Asocial - Uno webservice in java per un social network
+Asocial
+=======
 
+Un webservice in java per un social network
 
-Info e descrizione progetto qui:
+ - Info e descrizione progetto qui: http://tinyurl.com/ads8y2t
+ - wsdl di esempio qui:  http://tinyurl.com/bec4kty
 
-https://docs.google.com/document/d/1ZRPtBTHKcjbL_pWrTGl5NlXVfJi0XenBgFSNmAiI6VI/edit?usp=sharing
+Questo progetto è stato sviluppato per il corso di Sistemi Aperti e Distribuiti del corso di Informatica UNIPG (2011-2012)
 
-wsdl di esempio qui:
-
-https://docs.google.com/document/d/1ug1GEXpFXpsLcX0g6IxDrWB_WI7LmP6dqPWhL_jBty0/edit?usp=sharing
+E' tutta colpa di Andrea Forgione e Robert Parcus.
